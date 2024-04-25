@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Time Zone Converter</title>
+  <style>
+    body {
+      background-color: white; /* Set body background to white */
+    }
+  </style>
+  <script>
+  function getTimezoneOffset() {
+    // Detect user's timezone offset in hours relative to UTC
+    var offset = new Date().getTimezoneOffset() / 60;
+    return offset;
+  }
+  
+  function getURLParameter(name) {
+    // Get the value of a specific parameter from the URL
+    var url = window.location.href;
+    var urlParams = new URLSearchParams(url.split('?')[1]);
+    return urlParams.get(name);
+  }
+  
+  function updateTime() {
+    var utcOffset = getURLParameter("UTC");
+    
+    // Redirect if no UTC parameter is provided (fix applied)
+    if (!utcOffset) {
+      var userOffset = getTimezoneOffset() * -1;
+      var currentURL = new URL(window.location.href);
+      currentURL.searchParams.set("UTC", userOffset);
+      window.location.replace(currentURL.href);
+      return;
+    }
+    
+    // Handle UTC parameter (use it directly)
+    var offset = parseFloat(utcOffset);
+    
+    var date = new Date();
+    var utcHours = date.getUTCHours();
+    var utcMinutes = date.getUTCMinutes();
+    var utcSeconds = date.getUTCSeconds();
+    
+    var hours = utcHours + offset;
+    var minutes = utcMinutes;
+    var seconds = utcSeconds;
+    
+    // Handle cases where time goes beyond 24 hours
+    if (hours >= 24) {
+      hours = hours - 24;
+    } else if (hours < 0) {
+      hours = hours + 24;
+    }
+    
+    var formattedTime = hours.toString().padStart(2, '0') + ':' + 
+                        minutes.toString().padStart(2, '0') + ':' + 
+                        seconds.toString().padStart(2, '0');
+    
+    var clockElement = document.querySelector("svg text");
+    clockElement.textContent = formattedTime;
+  }
+  </script>
+</head>
+<body>
+  <svg width="100" height="50">
+    <text x="50" y="25" dominant-baseline="middle" text-anchor="middle" font-size="24" fill="black">00:00:00</text>
+  </svg>
+  <script>
+    updateTime();
+    setInterval(updateTime, 1000);
+  </script>
+</body>
+</html>
